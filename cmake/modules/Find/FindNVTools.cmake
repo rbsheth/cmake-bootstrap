@@ -1,0 +1,15 @@
+#find NVIDIA tools library
+
+
+if( CMAKE_SYSTEM_NAME STREQUAL "Windows"  )
+  #not supported yet
+else()
+  set( NVTOOLS_NAMES nvToolsExt)
+  set( NVTOOLS_LIB_PATHS "${CUDA_TOOLKIT_ROOT_DIR}/lib64" ) 
+endif()
+
+set( NVTOOLS_INC_PATHS ${CUDA_INCLUDE_DIRS} )
+find_path(NVTOOLS_INCLUDE_DIR nvToolsExt.h PATHS ${NVTOOLS_INC_PATHS} NO_DEFAULT_PATH)
+find_path(NVTOOLS_INCLUDE_DIR nvToolsExt.h PATHS ${NVTOOLS_INC_PATHS})
+
+find_library(NVTOOLS_LIBRARY NAMES ${NVTOOLS_NAMES} PATHS ${NVTOOLS_LIB_PATHS} )

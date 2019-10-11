@@ -1,0 +1,4 @@
+string(REGEX REPLACE ".*(${PROJ_NAME}[^\\.]*)\\..*" "\\1" ${PROJ_NAME}_LIBRARY_NAME "${${PROJ_NAME}_FILE_NAME}")
+string(REGEX REPLACE ".*(${PROJ_NAME}JNI[^\\.]*)\\..*" "\\1" ${PROJ_NAME}JNI_LIBRARY_NAME "${${PROJ_NAME}JNI_FILE_NAME}")
+
+configure_file(${${PROJ_NAME}JNI_JAVA_FILE} ${${PROJ_NAME}JNI_JAVA_FILE})
