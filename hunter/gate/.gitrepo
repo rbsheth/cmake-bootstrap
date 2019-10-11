@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/cpp-pm/gate.git
+	branch = master
+	commit = d17a3de364d163ec6e4e630ecb519fd9e96e08e2
+	parent = 9cf373b87c2cecee44cf6b06da52dbec41bd0353
+	method = merge
+	cmdver = 0.4.0
