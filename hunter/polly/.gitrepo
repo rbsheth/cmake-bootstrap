@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/cpp-pm/polly.git
+	branch = master
+	commit = af7c74dc12d2b8c76535f5b6a15c1332e7a46cdb
+	parent = ee6a78f2c8c846a5bf1a28b411e6d03a31a2fa09
+	method = merge
+	cmdver = 0.4.0
