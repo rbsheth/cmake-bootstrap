@@ -1,0 +1,12 @@
+if(${PROJ_NAME}_BUILD_JAVA_BINDINGS OR ${PROJ_NAME}_BUILD_PYTHON_BINDINGS)
+  if(POLICY CMP0078)
+    cmake_policy(SET CMP0078 NEW)
+  endif(POLICY CMP0078)
+
+  if(POLICY CMP0086)
+    cmake_policy(SET CMP0086 NEW)
+  endif(POLICY CMP0086)
+
+  find_package(SWIG REQUIRED)
+  include(${SWIG_USE_FILE})
+endif()

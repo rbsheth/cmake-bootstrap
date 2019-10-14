@@ -14,6 +14,10 @@ function(CreateTest SUBTEST_NAME SUBTEST_SOURCES)
 
   # Put the test in the Tests folder in IDEs.
   set_target_properties(${SUBTEST_NAME} PROPERTIES FOLDER Tests)
+  # Get rid of link warning for MSVC
+  if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set_target_properties(${SUBPROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+  endif()
 
   add_test(Test${SUBTEST_NAME} ${SUBTEST_NAME})
 endfunction()

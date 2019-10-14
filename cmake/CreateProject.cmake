@@ -18,10 +18,18 @@ function(CreateProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_RESOURCES)
     add_dependencies(${SUBPROJECT_NAME} format)
   endif(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
 
+  # Put the project in the Projects folder in IDEs.
+  set_target_properties(${SUBPROJECT_NAME} PROPERTIES FOLDER Projects)
+  # Get rid of link warning for MSVC
+  if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set_target_properties(${SUBPROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+  endif()
+
   if(_is_ios OR _is_ios_sim)
+    # TODO(rbsheth): Pass in bundle identifier here
     set_target_properties(${SUBPROJECT_NAME} PROPERTIES
       MACOSX_BUNDLE_BUNDLE_NAME "${SUBPROJECT_NAME}"
-      MACOSX_BUNDLE_GUI_IDENTIFIER "com.bitstrips.${SUBPROJECT_NAME}"
+      MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.${SUBPROJECT_NAME}"
       MACOSX_BUNDLE_INFO_PLIST ${${PROJ_NAME}_ROOT_DIR}/cmake/MacOSXBundleInfo.plist.in
       RESOURCE "${RESOURCES}")
   else()
@@ -42,4 +50,7 @@ function(CreateJavaProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_ENTRY_P
   add_dependencies(${SUBPROJECT_NAME} ${PROJ_NAME}JNI)
 
   add_test(NAME Run${SUBPROJECT_NAME} COMMAND ${Java_JAVA_EXECUTABLE} -cp ${${PROJ_NAME}_JAR_FILE}:${${SUBPROJECT_NAME}_JAR_FILE} ${SUBPROJECT_ENTRY_POINT})
+
+  # Put the "test" in the Projects folder in IDEs.
+  set_target_properties(${SUBPROJECT_NAME} PROPERTIES FOLDER Projects)
 endfunction()

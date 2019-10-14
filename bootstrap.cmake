@@ -120,26 +120,26 @@ if(NOT ${PROJ_NAME}_DISABLE_ARCHITECTURE_OPTIMIZATION AND NOT OPT_ARCH_FLAGS)
   foreach(_flag IN LISTS Vc_ARCHITECTURE_FLAGS)
     set(ARCH_FLAGS "${ARCH_FLAGS} ${_flag}" )
   endforeach()
-  set(OPT_ARCH_FLAGS "${ARCH_FLAGS}" CACHE STRING "Optimized flags for current architecture.")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_ARCH_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_ARCH_FLAGS}")
+  string(STRIP "${ARCH_FLAGS}" OPT_ARCH_FLAGS)
+  add_compile_options(${OPT_ARCH_FLAGS})
 endif()
 
 if(${PROJ_NAME}_DEV)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PROJ_NAME}_DEV")
+  add_compile_definitions(${PROJ_NAME}_DEV)
 endif()
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   # Enable math defines like M_PI
-  add_definitions(/D_USE_MATH_DEFINES)
+  add_compile_definitions(_USE_MATH_DEFINES)
   # Enable multi-threaded compilation
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  add_compile_options(/MP)
   # Enable Edit and Continue
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
   # Define _WIN32_WINNT=0x0600 for gRPC
-  add_definitions(/D_WIN32_WINNT=0x0600)
+  add_compile_definitions(_WIN32_WINNT=0x0600)
   # Disable CRT security warnings
-  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Turn on the ability to group targets in IDE folders.
@@ -158,3 +158,9 @@ endif()
 if(${PROJ_NAME}_BUILD_TESTS)
   include(CreateTest)
 endif()
+
+include(SwigCommonSetup)
+include(GenerateJavaBindings)
+include(GeneratePythonBindings)
+
+include(GenerateProtobufFiles)
