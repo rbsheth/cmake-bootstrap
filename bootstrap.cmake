@@ -135,7 +135,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   add_compile_options(/MP)
   # Enable Edit and Continue
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
   # Define _WIN32_WINNT=0x0600 for gRPC
   add_compile_definitions(_WIN32_WINNT=0x0600)
   # Disable CRT security warnings

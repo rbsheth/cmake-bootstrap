@@ -119,7 +119,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         exit(1)
 
     # Try to extract the project name from the CMake file
-    projNameRegex = re.compile(r"^set\(PROJ_NAME[\"\ ]*([a-zA-Z0-9]*)[\"\ ]*\)$")
+    projNameRegex = re.compile(r"^set\(PROJ_NAME[\"\ ]*([a-zA-Z0-9\-]*)[\"\ ]*\)$")
     for line in open("CMakeLists.txt", 'r'):
         for match in re.finditer(projNameRegex, line):
             projectName = match.group(1)
