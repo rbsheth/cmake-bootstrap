@@ -131,10 +131,10 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
 
     selectedToolchain = args.toolchain
 
-    additionalCMakeArguments = ""
+    additionalCMakeArguments = []
     need3rdPartyBuild = False
     if "emscripten" in args.toolchain:
-        additionalCMakeArguments += " -DEMSCRIPTEN_FORCE_COMPILERS=ON"
+        additionalCMakeArguments.append("-DEMSCRIPTEN_FORCE_COMPILERS=ON")
         print("The Emscripten toolchain will not build Java bindings, shared libraries, projects, or tests, even if selected.")
         args.with_java = False
         args.build_shared = False
@@ -142,23 +142,23 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         args.without_tests = True
 
     if args.with_java:
-        additionalCMakeArguments += " -D"+projectName+"_BUILD_JAVA_BINDINGS=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_BUILD_JAVA_BINDINGS=ON")
     if args.with_python:
-        additionalCMakeArguments += " -D"+projectName+"_BUILD_PYTHON_BINDINGS=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_BUILD_PYTHON_BINDINGS=ON")
     if args.build_shared:
-        additionalCMakeArguments += " -D"+projectName+"_BUILD_SHARED_LIBS=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_BUILD_SHARED_LIBS=ON")
     if args.without_projects:
-        additionalCMakeArguments += " -D"+projectName+"_BUILD_PROJECTS=OFF"
+        additionalCMakeArguments.append("-D"+projectName+"_BUILD_PROJECTS=OFF")
     if args.without_tests:
-        additionalCMakeArguments += " -D"+projectName+"_BUILD_TESTS=OFF"
+        additionalCMakeArguments.append("-D"+projectName+"_BUILD_TESTS=OFF")
     if args.without_clang_format:
-        additionalCMakeArguments += " -D"+projectName+"_ENABLE_CLANG_FORMAT=OFF"
+        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CLANG_FORMAT=OFF")
     if args.with_clang_tidy:
-        additionalCMakeArguments += " -D"+projectName+"_ENABLE_CLANG_TIDY=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CLANG_TIDY=ON")
     if args.with_iwyu:
-        additionalCMakeArguments += " -D"+projectName+"_ENABLE_IWYU=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_IWYU=ON")
     if args.with_cuda:
-        additionalCMakeArguments += " -D"+projectName+"_ENABLE_CUDA=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CUDA=ON")
     if(checkParserArguments):
         checkParserArguments(args, additionalCMakeArguments, projectName)
     # Turn the dev flag on if you have explicitly requested for the dev
@@ -166,9 +166,9 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     # release build. This is useful for not needing to regenerate Xcode
     # projects - they just always default to Dev mode.
     if args.dev or args.config is None or args.config == "Debug":
-        additionalCMakeArguments += " -D"+projectName+"_DEV=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_DEV=ON")
     if args.disable_tuning:
-        additionalCMakeArguments += " -D"+projectName+"_DISABLE_ARCHITECTURE_OPTIMIZATION=ON"
+        additionalCMakeArguments.append("-D"+projectName+"_DISABLE_ARCHITECTURE_OPTIMIZATION=ON")
     configArgument = ""
     generatorArgument = ""
     extraDirName = ""
@@ -179,16 +179,16 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
             args.generator = "Unix Makefiles"
         extraDirName = "-"+args.config
         configArgument = "--config " + args.config + " "
-        additionalCMakeArguments += " -DCMAKE_BUILD_TYPE="+args.config
+        additionalCMakeArguments.append("-DCMAKE_BUILD_TYPE="+args.config)
     else:
         if "ios" in selectedToolchain or "osx" in selectedToolchain:
             args.generator = "Xcode"
         elif selectedToolchain == "vs-15-2017-win64-cxx17":
             args.generator = "Visual Studio 15 2017 Win64"
-            additionalCMakeArguments += " -T host=x64"
+            additionalCMakeArguments.append("-T host=x64")
         elif selectedToolchain == "vs-16-2019-win64-cxx17":
             args.generator = "Visual Studio 16 2019"
-            additionalCMakeArguments += " -A x64"
+            additionalCMakeArguments.append("-A x64")
         else:
             args.generator = "Unix Makefiles"
     buildDir = "_builds/"+selectedToolchain+extraDirName
@@ -226,7 +226,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "\" -DCMAKE_TOOLCHAIN_FILE=" +
         pathToToolchain +
         " -DHUNTER_STATUS_DEBUG=OFF -DHUNTER_USE_CACHE_SERVERS=YES" +
-        additionalCMakeArguments)
+        " ".join(additionalCMakeArguments))
     sp = subprocess.call(cmakeCallString, shell=True)
 
     return sp
