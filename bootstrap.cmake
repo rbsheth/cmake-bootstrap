@@ -77,7 +77,7 @@ IF(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
   set(GCF_PYTHON_PATH "python")
   set(GCF_CLANGFORMAT_PATH "clang-format")
   set(GCF_CLANGFORMAT_STYLE "Google")
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cmake/git-cmake-format)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cmake/git-cmake-format ${CMAKE_CURRENT_BINARY_DIR}/cmake/git-cmake-format)
 ENDIF()
 
 IF(${PROJ_NAME}_ENABLE_CLANG_TIDY)
