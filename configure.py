@@ -225,7 +225,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         args.generator +
         "\" -DCMAKE_TOOLCHAIN_FILE=" +
         pathToToolchain +
-        " -DHUNTER_STATUS_DEBUG=OFF -DHUNTER_USE_CACHE_SERVERS=YES" +
+        " -DHUNTER_STATUS_DEBUG=OFF -DHUNTER_USE_CACHE_SERVERS=YES " +
         " ".join(additionalCMakeArguments))
     sp = subprocess.call(cmakeCallString, shell=True)
 
