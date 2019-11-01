@@ -39,7 +39,7 @@ macro(GenerateProtobufFiles PathToProtobufFilelist)
     # Add the absolute paths to the proto source and generated files
     # to the project source list so they show up in IDEs when added to a
     # source group.
-    list(APPEND ${PROJ_NAME}_SOURCE_FILES ${PROTO_FILE} ${${PROJ_NAME}_PROTO_GENERATED_FILES_ABSOLUTE})
+    target_sources(${PROJ_NAME} PRIVATE ${PROTO_FILE} ${${PROJ_NAME}_PROTO_GENERATED_FILES_ABSOLUTE})
 
     # Use a Windows-style path for source groups, so that directory structure
     # is preserved.
@@ -68,7 +68,7 @@ macro(GenerateProtobufFiles PathToProtobufFilelist)
       set(${PROJ_NAME}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}.grpc.pb.cc
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}.grpc.pb.h)
-      list(APPEND ${PROJ_NAME}_SOURCE_FILES ${${PROJ_NAME}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
+      target_sources(${PROJ_NAME} PRIVATE ${${PROJ_NAME}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
       source_group("${PROTO_FILE_DIR}\\Generated Files" FILES ${${PROJ_NAME}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
       add_custom_command(
         OUTPUT ${${PROJ_NAME}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE}
@@ -84,7 +84,7 @@ macro(GenerateProtobufFiles PathToProtobufFilelist)
           ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}_pb2.py)
         set(${PROJ_NAME}_PYTHON_GRPC_PROTO_GENERATED_FILES_ABSOLUTE
           ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}_pb2_grpc.py)
-        list(APPEND ${PROJ_NAME}_SOURCE_FILES ${${PROJ_NAME}_PYTHON_PROTO_GENERATED_FILES_ABSOLUTE} ${${PROJ_NAME}_PYTHON_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
+        target_sources(${PROJ_NAME} PRIVATE ${${PROJ_NAME}_PYTHON_PROTO_GENERATED_FILES_ABSOLUTE} ${${PROJ_NAME}_PYTHON_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
         source_group("${PROTO_FILE_DIR}\\Generated Files" FILES ${${PROJ_NAME}_PYTHON_PROTO_GENERATED_FILES_ABSOLUTE} ${${PROJ_NAME}_PYTHON_GRPC_PROTO_GENERATED_FILES_ABSOLUTE})
         add_custom_command(
           OUTPUT ${${PROJ_NAME}_PYTHON_PROTO_GENERATED_FILES_ABSOLUTE}
