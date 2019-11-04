@@ -135,7 +135,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   # Enable math defines like M_PI
   add_compile_definitions(_USE_MATH_DEFINES)
   # Enable multi-threaded compilation
-  add_compile_options(/MP)
+  add_compile_options(
+    "$<$<COMPILE_LANGUAGE:C>:/MP>"
+    "$<$<COMPILE_LANGUAGE:CXX>:/MP>"
+  )
   # Enable Edit and Continue
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
   # Define _WIN32_WINNT=0x0600 for gRPC
