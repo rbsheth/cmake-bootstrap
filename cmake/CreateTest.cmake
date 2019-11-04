@@ -6,7 +6,7 @@ function(CreateTest SUBTEST_NAME SUBTEST_SOURCES)
   BuildSourceGroup("${SUBTEST_SOURCES}")
 
   add_executable(${SUBTEST_NAME} ${SUBTEST_SOURCES})
-  target_link_libraries(${SUBTEST_NAME} ${PROJ_NAME} GMock::main GTest::main)
+  target_link_libraries(${SUBTEST_NAME} ${PROJ_NAME} GTest::gtest_main GTest::gmock)
 
   if(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
     add_dependencies(${SUBTEST_NAME} format)

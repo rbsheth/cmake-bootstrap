@@ -52,9 +52,9 @@ macro(GenerateJavaBindings InterfaceFiles InterfaceFileDependencies PackageName)
                              -D${PROJ_NAME}_FILE_NAME=$<TARGET_FILE_NAME:${PROJ_NAME}>
                              -D${PROJ_NAME}JAVA_FILE_NAME=$<TARGET_FILE_NAME:${PROJ_NAME}Java>
                              -D${PROJ_NAME}JAVA_JNI_FILE=${CMAKE_SWIG_OUTDIR}/${PROJ_NAME}JNI.java
-                             -P ${${PROJ_NAME}_ROOT_DIR}/../cmake/bootstrap/cmake/java/ConfigureJNILibraryName.cmake
+                             -P ${BOOTSTRAP_ROOT_DIR}/cmake/java/ConfigureJNILibraryName.cmake
     COMMAND "${Java_JAVAC_EXECUTABLE}" -d ${JAVA_CLASSES_OUTDIR}
-                                          ${${PROJ_NAME}_ROOT_DIR}/../cmake/bootstrap/cmake/java/NativeUtils.java
+                                          ${BOOTSTRAP_ROOT_DIR}/cmake/java/NativeUtils.java
     COMMAND "${Java_JAVAC_EXECUTABLE}" -cp ${JAVA_CLASSES_OUTDIR}
                                         -d ${JAVA_CLASSES_OUTDIR}
                                            ${CMAKE_SWIG_OUTDIR}/*.java
