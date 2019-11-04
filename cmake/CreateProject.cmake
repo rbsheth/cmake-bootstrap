@@ -39,8 +39,6 @@ function(CreateProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_RESOURCES)
 endfunction()
 
 function(CreateJavaProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_ENTRY_POINT)
-  BuildSourceGroup("${SUBPROJECT_SOURCES}")
-
   find_package(Java REQUIRED)
   include(UseJava)
 
@@ -49,7 +47,9 @@ function(CreateJavaProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_ENTRY_P
   # ${PROJ_NAME}JNI is dependent on format, don't need to add the dependency again.
   add_dependencies(${SUBPROJECT_NAME} ${PROJ_NAME}Java)
 
-  add_test(NAME Run${SUBPROJECT_NAME} COMMAND ${Java_JAVA_EXECUTABLE} -cp ${${PROJ_NAME}_JAR_FILE}:${${SUBPROJECT_NAME}_JAR_FILE} ${SUBPROJECT_ENTRY_POINT})
+  # Windows uses a semicolon to delimit class paths, whereas other platforms use a colon.
+  add_test(NAME Run${SUBPROJECT_NAME}
+           COMMAND ${Java_JAVA_EXECUTABLE} -cp ${${PROJ_NAME}_JAR_FILE}$<IF:$<PLATFORM_ID:Windows>,$<SEMICOLON>,":">${${SUBPROJECT_NAME}_JAR_FILE} ${SUBPROJECT_ENTRY_POINT})
 
   # Put the "test" in the Projects folder in IDEs.
   set_target_properties(${SUBPROJECT_NAME} PROPERTIES FOLDER Projects)

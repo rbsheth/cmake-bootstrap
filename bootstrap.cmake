@@ -155,8 +155,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # of the ${PROJ_NAME}_BUILD_TESTS option.
 enable_testing()
 
-set(SOURCE_GROUP_NAME ${PROJ_NAME})
-
 if(${PROJ_NAME}_BUILD_PROJECTS)
   include(CreateProject)
 endif()
@@ -170,3 +168,4 @@ include(GenerateJavaBindings)
 include(GeneratePythonBindings)
 
 include(GenerateProtobufFiles)
+include(GenerateFlatbufferFiles)
