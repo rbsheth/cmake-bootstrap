@@ -68,7 +68,7 @@ macro(GenerateProtobufFiles)
     )
 
     # Run the protoc compiler again with the gRPC plugin for gRPC files.
-    if(PROTO_FILE IN_LIST _GPBF_ARGS_GRPC_PROTO_FILES)
+    if(PROTO_FILE_NAME IN_LIST _GPBF_ARGS_GRPC_PROTO_FILES)
       set(${_GPBF_ARGS_TARGET}_GRPC_PROTO_GENERATED_FILES_ABSOLUTE
         ${CMAKE_CURRENT_BINARY_DIR}/${_GPBF_ARGS_TARGET}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}.grpc.pb.cc
         ${CMAKE_CURRENT_BINARY_DIR}/${_GPBF_ARGS_TARGET}/${PROTO_FILE_DIR}/${PROTO_FILE_BASENAME}.grpc.pb.h)

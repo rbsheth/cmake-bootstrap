@@ -63,4 +63,11 @@ macro(GenerateFlatbufferFiles)
         VERBATIM
     )
   endforeach()
+
+  # Include the current directory so that include paths like
+  # Project/Flatbuffers/Example_generated.h work as intended.
+  include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+  # Include the Flatbuffers directory because flatc adds subdirectories
+  # into the generated .h files.
+  include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/${_GFBF_ARGS_TARGET}/${${_GFBF_ARGS_TARGET}_FLATBUFFER_DIR})
 endmacro()
