@@ -12,7 +12,7 @@ endif(IOS OR ANDROID)
 macro(GenerateFlatbufferFiles)
   set(_OPTIONS_ARGS)
   set(_SINGLE_VALUE_ARGS TARGET DIRECTORY_PREFIX)
-  set(_MULTI_VALUE_ARGS FLATBUFFER_FILES)
+  set(_MULTI_VALUE_ARGS FLATBUFFER_FILES LANGUAGES)
   cmake_parse_arguments(_GFBF_ARGS "${_OPTIONS_ARGS}" "${_SINGLE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN})
 
   get_filename_component(COMMON_FLATBUFFER_PATH "${_GFBF_ARGS_DIRECTORY_PREFIX}" ABSOLUTE)
@@ -34,40 +34,60 @@ macro(GenerateFlatbufferFiles)
 
     set(${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE
         ${CMAKE_CURRENT_BINARY_DIR}/${_GFBF_ARGS_TARGET}/${FLATBUFFER_FILE_DIR})
-    set(${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE
-        "${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE}/${FLATBUFFER_FILE_BASENAME}_generated.h")
 
-    # Add the absolute paths for both the source schema and generated header files
-    # to the Lightning source list so they show up in IDEs when added to a
-    # source group.
-    target_sources(${_GFBF_ARGS_TARGET} PRIVATE ${FLATBUFFER_FILE} ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE})
+    if("CXX" IN_LIST _GFBF_ARGS_LANGUAGES)
+      set(${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE
+          "${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE}/${FLATBUFFER_FILE_BASENAME}_generated.h")
 
-    # Use a Windows-style path for source groups, so that directory structure
-    # is preserved.
-    string(REPLACE "/" "\\" FLATBUFFER_FILE_DIR ${FLATBUFFER_FILE_DIR})
-    source_group("${FLATBUFFER_FILE_DIR}" FILES ${FLATBUFFER_FILE})
-    source_group("${FLATBUFFER_FILE_DIR}\\Generated Files" FILES ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE})
+      # Add the absolute paths for both the source schema and generated header files
+      # to the Lightning source list so they show up in IDEs when added to a
+      # source group.
+      target_sources(${_GFBF_ARGS_TARGET} PRIVATE ${FLATBUFFER_FILE} ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE})
 
-    # Create output directory if needed
-    file(MAKE_DIRECTORY ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE})
+      # Use a Windows-style path for source groups, so that directory structure
+      # is preserved.
+      string(REPLACE "/" "\\" FLATBUFFER_FILE_DIR ${FLATBUFFER_FILE_DIR})
+      source_group("${FLATBUFFER_FILE_DIR}" FILES ${FLATBUFFER_FILE})
+      source_group("${FLATBUFFER_FILE_DIR}\\Generated Files" FILES ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE})
 
-    # Here we use a custom command that explicitly invokes the flatbuffer compiler executable compiled with hunter.
-    # This is why DON'T simply use the FLATBUFFERS_GENERATE_C_HEADERS command (defined here:
-    # https://github.com/hunter-packages/flatbuffers/blob/383963f9e6d045cea82482feb807f15f7669ad83/CMake/FindFlatBuffers.cmake#L37)
-    # as there are no guarantees for which flatc that function will use.
-    add_custom_command(
-        OUTPUT ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE}
-        COMMAND flatbuffers::flatc --cpp -o ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE} ${FLATBUFFER_FILE_ABSOLUTE}
-        COMMENT "Generating ${FLATBUFFER_FILE_BASENAME}_generated.h from ${FLATBUFFER_FILE}"
+      # Create output directory if needed
+      file(MAKE_DIRECTORY ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE})
+
+      # Here we use a custom command that explicitly invokes the flatbuffer compiler executable compiled with hunter.
+      # This is why DON'T simply use the FLATBUFFERS_GENERATE_C_HEADERS command (defined here:
+      # https://github.com/hunter-packages/flatbuffers/blob/383963f9e6d045cea82482feb807f15f7669ad83/CMake/FindFlatBuffers.cmake#L37)
+      # as there are no guarantees for which flatc that function will use.
+      add_custom_command(
+          OUTPUT ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_FILE_ABSOLUTE}
+          COMMAND flatbuffers::flatc --cpp -o ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE} -I ${COMMON_FLATBUFFER_PATH} ${FLATBUFFER_FILE_ABSOLUTE}
+          COMMENT "Generating ${FLATBUFFER_FILE_BASENAME}_generated.h from ${FLATBUFFER_FILE}"
+          DEPENDS ${FLATBUFFER_FILE}
+          VERBATIM
+      )
+    endif()
+
+    # Generate Python files if requested
+    if("Python" IN_LIST _GFBF_ARGS_LANGUAGES)
+      set(${_GFBF_ARGS_TARGET}_PYTHON_FLATBUFFER_GENERATED_FILES_ABSOLUTE
+        ${CMAKE_CURRENT_BINARY_DIR}/${_GFBF_ARGS_TARGET}/${FLATBUFFER_FILE_DIR}/${FLATBUFFER_FILE_BASENAME}.py)
+      target_sources(${_GFBF_ARGS_TARGET} PRIVATE ${${_GFBF_ARGS_TARGET}_PYTHON_FLATBUFFER_GENERATED_FILES_ABSOLUTE})
+      source_group("${FLATBUFFER_FILE_DIR}\\Generated Files" FILES ${${_GPBF_ARGS_TARGET}_PYTHON_FLATBUFFER_GENERATED_FILES_ABSOLUTE})
+      add_custom_command(
+        OUTPUT ${${_GFBF_ARGS_TARGET}_PYTHON_FLATBUFFER_GENERATED_FILES_ABSOLUTE}
+        COMMAND flatbuffers::flatc --python -o ${${_GFBF_ARGS_TARGET}_FLATBUFFER_GENERATED_DIR_ABSOLUTE} -I ${COMMON_FLATBUFFER_PATH} ${FLATBUFFER_FILE_ABSOLUTE}
+        COMMENT "Generating ${FLATBUFFER_FILE_BASENAME}.py from ${FLATBUFFER_FILE}"
         DEPENDS ${FLATBUFFER_FILE}
         VERBATIM
-    )
+      )
+    endif()
   endforeach()
 
-  # Include the current directory so that include paths like
-  # Project/Flatbuffers/Example_generated.h work as intended.
-  include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
-  # Include the Flatbuffers directory because flatc adds subdirectories
-  # into the generated .h files.
-  include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/${_GFBF_ARGS_TARGET}/${${_GFBF_ARGS_TARGET}_FLATBUFFER_DIR})
+  if("CXX" IN_LIST _GFBF_ARGS_LANGUAGES)
+    # Include the current directory so that include paths like
+    # Project/Flatbuffers/Example_generated.h work as intended.
+    include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+    # Include the Flatbuffers directory because flatc adds subdirectories
+    # into the generated .h files.
+    include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/${_GFBF_ARGS_TARGET}/${${_GFBF_ARGS_TARGET}_FLATBUFFER_DIR})
+  endif()
 endmacro()

@@ -84,7 +84,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
             if b'=' in row:
                 key, value = row.split(b'=')
                 key = key.strip()
-                if key is not b'':
+                if key != b'':
                     availableGenerators.append(key.decode('utf-8'))
 
     if len(availableGenerators) == 0:
@@ -159,8 +159,6 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         additionalCMakeArguments.append("-D"+projectName+"_ENABLE_IWYU=ON")
     if args.with_cuda:
         additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CUDA=ON")
-    if(checkParserArguments):
-        checkParserArguments(args, additionalCMakeArguments, projectName)
     # Turn the dev flag on if you have explicitly requested for the dev
     # flag to be on, or if the build type is not explicitly a type of
     # release build. This is useful for not needing to regenerate Xcode
@@ -191,18 +189,20 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
             additionalCMakeArguments.append("-A x64")
         else:
             args.generator = "Unix Makefiles"
-    buildDir = "_builds/"+selectedToolchain+extraDirName
-    if args.build_dir is not None:
-        buildDir = args.build_dir
+    if args.build_dir is None:
+        args.build_dir = "_builds/"+selectedToolchain+extraDirName
+
+    if(checkParserArguments):
+        checkParserArguments(args, additionalCMakeArguments, projectName)
 
     if args.clear_all:
         if(os.path.isdir("_builds")):
             shutil.rmtree("_builds")
     elif args.clear:
-        if(os.path.isdir(buildDir)):
-            shutil.rmtree(buildDir)
+        if(os.path.isdir(args.build_dir)):
+            shutil.rmtree(args.build_dir)
 
-    mkdir_p(buildDir)
+    mkdir_p(args.build_dir)
 
     if need3rdPartyBuild:
         cmake3rdPartyCallString = "cmake -H3rdparty/ -B3rdparty/_build"
@@ -220,7 +220,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
 
     cmakeCallString = (
         "cmake -H. -B" +
-        buildDir +
+        args.build_dir +
         " -G\"" +
         args.generator +
         "\" -DCMAKE_TOOLCHAIN_FILE=" +
@@ -230,3 +230,6 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     sp = subprocess.call(cmakeCallString, shell=True)
 
     return sp
+
+if __name__ == "__main__":
+    cmakeWrapper()
