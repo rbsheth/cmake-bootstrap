@@ -48,6 +48,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "gcc-8-cxx17-fpic (gcc/g++ 8, C++17, PIC, Unix Makefiles)",
         "vs-15-2017-win64-cxx17 (Visual Studio 2017 Win64, C++17)",
         "vs-16-2019-win64-cxx17 (Visual Studio 2019 Win64, C++17)"
+        "vs-16-2019-win64-cxx17-cuda-cxx14 (Visual Studio 2019 Win64, C++17, CUDA C++14)"
     ]
 
     availableToolchains = [
@@ -59,7 +60,8 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "emscripten-cxx17",
         "gcc-8-cxx17-fpic",
         "vs-15-2017-win64-cxx17",
-        "vs-16-2019-win64-cxx17"
+        "vs-16-2019-win64-cxx17",
+        "vs-16-2019-win64-cxx17-cuda-cxx14"
     ]
 
     availableConfigs = [
@@ -181,10 +183,10 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     else:
         if "ios" in selectedToolchain or "osx" in selectedToolchain:
             args.generator = "Xcode"
-        elif selectedToolchain == "vs-15-2017-win64-cxx17":
+        elif "vs-15-2017-win64" in selectedToolchain:
             args.generator = "Visual Studio 15 2017 Win64"
             additionalCMakeArguments.append("-T host=x64")
-        elif selectedToolchain == "vs-16-2019-win64-cxx17":
+        elif "vs-16-2019-win64" in selectedToolchain:
             args.generator = "Visual Studio 16 2019"
             additionalCMakeArguments.append("-A x64")
         else:
