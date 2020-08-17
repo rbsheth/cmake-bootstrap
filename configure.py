@@ -46,7 +46,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "clang-libcxx17-fpic (Clang/LLVM, LLVM Standard C++ Library (libc++), C++17, PIC, Default Generator: Unix Makefiles)",
         "emscripten-cxx17 (Emscripten/LLVM, C++17, Unix Makefiles)",
         "gcc-8-cxx17-fpic (gcc/g++ 8, C++17, PIC, Unix Makefiles)",
-        "gcc-10-cxx17-fpic (gcc/g++ 10, C++17, PIC, Unix Makefiles)",
+        "gcc-9-cxx17-fpic (gcc/g++ 9, C++17, PIC, Unix Makefiles)",
         "vs-15-2017-win64-cxx17 (Visual Studio 2017 Win64, C++17)",
         "vs-16-2019-win64-cxx17 (Visual Studio 2019 Win64, C++17)"
         "vs-16-2019-win64-cxx17-cuda-cxx14 (Visual Studio 2019 Win64, C++17, CUDA C++14)"
@@ -60,7 +60,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "clang-libcxx17-fpic",
         "emscripten-cxx17",
         "gcc-8-cxx17-fpic",
-        "gcc-10-cxx17-fpic",
+        "gcc-9-cxx17-fpic",
         "vs-15-2017-win64-cxx17",
         "vs-16-2019-win64-cxx17",
         "vs-16-2019-win64-cxx17-cuda-cxx14"
@@ -77,7 +77,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "clang-libcxx17-fpic",
         "emscripten-cxx17",
         "gcc-8-cxx17-fpic",
-        "gcc-10-cxx17-fpic"
+        "gcc-9-cxx17-fpic"
     ]
 
     #Retrieve the available generators from cmake.
