@@ -23,11 +23,11 @@ macro(GeneratePythonBindings InterfaceFiles InterfaceFileDependencies)
   set(CMAKE_RELWITHDEBINFO_POSTFIX "")
 
   # Use add_library since add_module was deprecated in cmake 3.8
-  swig_add_library(${PROJ_NAME}Python LANGUAGE python SOURCES )
+  swig_add_library(${PROJ_NAME}Python LANGUAGE python SOURCES ${InterfaceFiles})
   swig_link_libraries(${PROJ_NAME}Python ${PROJ_NAME} ${PYTHON_LIBRARIES})
 
   IF(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
-    add_dependencies(_${PROJ_NAME}Python format)
+    add_dependencies(${PROJ_NAME}Python format)
   ENDIF()
 
   set(CMAKE_DEBUG_POSTFIX ${SAVED_CMAKE_DEBUG_POSTFIX})
