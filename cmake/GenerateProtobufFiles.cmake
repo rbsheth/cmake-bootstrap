@@ -24,6 +24,10 @@ macro(GenerateProtobufFiles)
   # Set where the generated pb.cc/h files will live in the build tree.
   set(${_GPBF_ARGS_TARGET}_PROTO_DIR "Proto")
 
+  # Make the output directory in case it doesn't exist so that protoc doesn't
+  # fail.
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_GPBF_ARGS_TARGET}/${${_GPBF_ARGS_TARGET}_PROTO_DIR})
+
   foreach(PROTO_FILE_NAME ${_GPBF_ARGS_PROTO_FILES} ${_GPBF_ARGS_GRPC_PROTO_FILES})
     set(PROTO_FILE ${COMMON_PROTO_PATH}/${PROTO_FILE_NAME})
 
@@ -51,10 +55,6 @@ macro(GenerateProtobufFiles)
       string(REPLACE "/" "\\" PROTO_FILE_DIR ${PROTO_FILE_DIR})
       source_group("${PROTO_FILE_DIR}" FILES ${PROTO_FILE})
       source_group("${PROTO_FILE_DIR}\\Generated Files" FILES ${${_GPBF_ARGS_TARGET}_PROTO_GENERATED_FILES_ABSOLUTE})
-
-      # Make the output directory in case it doesn't exist so that protoc doesn't
-      # fail.
-      file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_GPBF_ARGS_TARGET}/${${_GPBF_ARGS_TARGET}_PROTO_DIR})
 
       # Use a custom command instead of protobuf_generate_cpp because we need
       # to force usage of the hunter-based protoc compiler. Output the files to
