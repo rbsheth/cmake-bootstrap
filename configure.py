@@ -6,6 +6,7 @@ import argparse
 import shutil
 import subprocess
 import re
+from distutils.version import StrictVersion
 
 def mkdir_p(path):
     try:
@@ -36,6 +37,17 @@ def let_user_pick(options):
     except:
         pass
     return None
+
+def getCmakeVersion():
+    sp = subprocess.Popen("cmake --version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    out, err = sp.communicate()
+    versionRegex = re.compile("cmake version\s([0-9\.]*)")
+
+    if out:
+        for row in out.split(b'\n'):
+            print(row.decode('utf-8'))
+            for match in re.finditer(versionRegex, row.decode('utf-8')):
+                return match.group(1)
 
 def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     availableToolchainsDescriptions = [
@@ -84,7 +96,7 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         "gcc-9-cxx17-fpic"
     ]
 
-    #Retrieve the available generators from cmake.
+    # Retrieve the available generators from cmake.
     sp = subprocess.Popen("cmake -G", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     out, err = sp.communicate()
     availableGenerators = []
@@ -99,6 +111,9 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     if len(availableGenerators) == 0:
         print("cmake not found in path. Please install it and try again!")
         exit(1)
+
+    # Retrieve the version number from CMake
+    cmakeVersion = getCmakeVersion()
 
     parser = argparse.ArgumentParser(description="Configure script to generate build files using CMake.", formatter_class=SmartFormatter)
     parser.add_argument("toolchain", help="R|Toolchain to use to build. Supported values are:\n\t"+"\n\t".join(availableToolchainsDescriptions), choices=availableToolchains, metavar='<toolchain>')
@@ -190,6 +205,9 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     else:
         if "ios" in selectedToolchain or "osx" in selectedToolchain:
             args.generator = "Xcode"
+            # The "new" Xcode buildsystem doesn't work with many Hunter packages
+            if StrictVersion("3.19") <= StrictVersion(getCmakeVersion()):
+                additionalCMakeArguments.append("-T buildsystem=1")
         elif "vs-14-2015-win64" in selectedToolchain:
             args.generator = "Visual Studio 14 2015 Win64"
         elif "vs-15-2017-win64" in selectedToolchain:
