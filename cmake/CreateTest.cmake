@@ -12,6 +12,15 @@ function(CreateTest SUBTEST_NAME SUBTEST_SOURCES)
     add_dependencies(${SUBTEST_NAME} format)
   endif(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
 
+  if(${PROJ_NAME}_ENABLE_CUDA)
+    foreach(SUBTEST_SRC_FILE_NAME ${SUBTEST_SOURCES})
+      if(SUBTEST_SRC_FILE_NAME MATCHES "cpp$")
+        set_source_files_properties(${SUBTEST_SRC_FILE_NAME} PROPERTIES LANGUAGE CUDA)
+      endif()
+    endforeach()
+    set_target_properties(${SUBTEST_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  endif(${PROJ_NAME}_ENABLE_CUDA)
+
   # Put the test in the Tests folder in IDEs.
   set_target_properties(${SUBTEST_NAME} PROPERTIES FOLDER Tests)
   # Get rid of link warning for MSVC

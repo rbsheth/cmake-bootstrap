@@ -18,6 +18,15 @@ function(CreateProject SUBPROJECT_NAME SUBPROJECT_SOURCES SUBPROJECT_RESOURCES)
     add_dependencies(${SUBPROJECT_NAME} format)
   endif(${PROJ_NAME}_ENABLE_CLANG_FORMAT)
 
+  if(${PROJ_NAME}_ENABLE_CUDA)
+    foreach(SUBPROJECT_SRC_FILE_NAME ${SUBPROJECT_SOURCES})
+      if(SUBPROJECT_SRC_FILE_NAME MATCHES "cpp$")
+        set_source_files_properties(${SUBPROJECT_SRC_FILE_NAME} PROPERTIES LANGUAGE CUDA)
+      endif()
+    endforeach()
+    set_target_properties(${SUBPROJECT_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  endif(${PROJ_NAME}_ENABLE_CUDA)
+
   # Put the project in the Projects folder in IDEs.
   set_target_properties(${SUBPROJECT_NAME} PROPERTIES FOLDER Projects)
   # Get rid of link warning for MSVC
