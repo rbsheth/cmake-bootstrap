@@ -158,6 +158,11 @@ def get_android_full_version_url():
     if platform.system() == 'Linux':
       return 'https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip', '500679655da3a86aecf67007e8ab230ea9b4dd7b',
 
+  if toolchain.startswith('android-ndk-r21d-'):
+    if platform.system() == 'Darwin':
+      return 'https://dl.google.com/android/repository/android-ndk-r21d-darwin-x86_64.zip', 'ef06c9f9d7efd6f243eb3c05ac440562ae29ae12',
+    if platform.system() == 'Linux':
+      return 'https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip', 'bcf4023eb8cb6976a4c7cff0a8a8f145f162bf4d',
 
   sys.exit('Android supported only for Linux and OSX')
 
@@ -196,18 +201,18 @@ def get_android_url():
 def get_cmake_url():
   if platform.system() == 'Darwin':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4-Darwin-x86_64.tar.gz',
-        'f50e95d22718382ddb2db8f9752b4bcb51ee7ba8'
+        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-macos-universal.tar.gz',
+        '6894085b4c4a81a142729d91e24c526edfd4205d'
     )
   elif platform.system() == 'Linux':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4-Linux-x86_64.tar.gz',
-        '98831ed604c324d1a61d5243a6021bcd13ddc8ac'
+        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.tar.gz',
+        '205509f796344864c513b6ad40a67a20b94117d4'
     )
   elif platform.system() == 'Windows':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4-win64-x64.zip',
-        'e958f2210270542662da720586e64164ca66a77c'
+        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-win64-x64.zip',
+        '76b58ef6ff20c4a11dab9ede9791c8d51e33988a'
     )
   else:
     sys.exit('Unknown system: {}'.format(platform.system()))
@@ -264,8 +269,8 @@ if is_android:
 
 if is_ninja:
   ninja = FileToDownload(
-      'https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-win.zip',
-      'c68f192e85a12927443bbf535d27b4aa830e7b32',
+      'https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip',
+      'ccacdf88912e061e0b527f2e3c69ee10544d6f8a',
       ninja_archive_local,
       ci_dir
   )

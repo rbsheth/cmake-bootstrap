@@ -42,7 +42,8 @@ class Toolchain:
   def verify(self):
     if self.arch:
       assert(self.is_nmake or self.is_msvc or self.is_ninja)
-      assert(self.arch == 'amd64' or self.arch == 'x86')
+      assert(self.arch == 'amd64' or self.arch == 'x86' or
+             self.arch == 'arm' or self.arch == 'arm64')
 
     if self.is_nmake or self.is_msvc:
       assert(self.vs_version)
@@ -331,6 +332,12 @@ if os.name == 'nt':
           vs_version='14'
       ),
       Toolchain(
+          'vs-14-2015-win64-sdk-8-1-cxx17',
+          'Visual Studio 14 2015 Win64',
+          arch='amd64',
+          vs_version='14'
+      ),
+      Toolchain(
           'vs-11-2012-arm',
           'Visual Studio 11 2012 ARM',
           vs_version='11'
@@ -344,6 +351,30 @@ if os.name == 'nt':
           'vs-14-2015-arm',
           'Visual Studio 14 2015 ARM',
           vs_version='14'
+      ),
+      Toolchain(
+          'vs-15-2017-arm',
+          'Visual Studio 15 2017',
+          arch='arm',
+          vs_version='15'
+      ),
+      Toolchain(
+          'vs-15-2017-arm64',
+          'Visual Studio 15 2017',
+          arch='arm64',
+          vs_version='15'
+      ),
+      Toolchain(
+          'vs-16-2019-arm',
+          'Visual Studio 16 2019',
+          arch='arm',
+          vs_version='16'
+      ),
+      Toolchain(
+          'vs-16-2019-arm64',
+          'Visual Studio 16 2019',
+          arch='arm64',
+          vs_version='16'
       ),
       Toolchain(
           'vs-15-2017-win64',
@@ -530,6 +561,26 @@ if platform.system() == 'Darwin':
       Toolchain('ios', 'Xcode'),
       Toolchain('ios-cxx17', 'Xcode'),
       Toolchain('ios-bitcode', 'Xcode'),
+      Toolchain('ios-14-4-dep-10-0-arm64', 'Xcode', ios_version='14.4'),
+      Toolchain('ios-14-4-dep-10-0-armv7', 'Xcode', ios_version='14.4'),
+      Toolchain('ios-14-4-dep-10-0-armv7s', 'Xcode', ios_version='14.4'),
+      Toolchain('ios-14-4-dep-10-0-device-cxx14', 'Xcode', ios_version='14.4'),
+      Toolchain('ios-14-4-dep-10-0-device-bitcode-cxx14', 'Xcode', ios_version='14.4'),      
+      Toolchain('ios-14-3-dep-10-0-arm64', 'Xcode', ios_version='14.3'),
+      Toolchain('ios-14-3-dep-10-0-armv7', 'Xcode', ios_version='14.3'),
+      Toolchain('ios-14-3-dep-10-0-armv7s', 'Xcode', ios_version='14.3'),
+      Toolchain('ios-14-3-dep-10-0-device-cxx14', 'Xcode', ios_version='14.3'),
+      Toolchain('ios-14-3-dep-10-0-device-bitcode-cxx14', 'Xcode', ios_version='14.3'),
+      Toolchain('ios-14-2-dep-10-0-arm64', 'Xcode', ios_version='14.2'),
+      Toolchain('ios-14-2-dep-10-0-armv7', 'Xcode', ios_version='14.2'),
+      Toolchain('ios-14-2-dep-10-0-armv7s', 'Xcode', ios_version='14.2'),
+      Toolchain('ios-14-2-dep-10-0-device-cxx14', 'Xcode', ios_version='14.2'),
+      Toolchain('ios-14-2-dep-10-0-device-bitcode-cxx14', 'Xcode', ios_version='14.2'),
+      Toolchain('ios-14-0-dep-9-3-arm64', 'Xcode', ios_version='14.0'),
+      Toolchain('ios-14-0-dep-9-3-armv7', 'Xcode', ios_version='14.0'),
+      Toolchain('ios-14-0-dep-9-3-armv7s', 'Xcode', ios_version='14.0'),
+      Toolchain('ios-14-0-dep-9-3-device-cxx14', 'Xcode', ios_version='14.0'),
+      Toolchain('ios-14-0-dep-9-3-device-bitcode-cxx14', 'Xcode', ios_version='14.0'),
       Toolchain('ios-13-6-dep-9-3-arm64', 'Xcode', ios_version='13.6'),
       Toolchain('ios-13-6-dep-9-3-armv7', 'Xcode', ios_version='13.6'),
       Toolchain('ios-13-6-dep-9-3-armv7s', 'Xcode', ios_version='13.6'),
@@ -662,6 +713,8 @@ if platform.system() == 'Darwin':
       Toolchain('ios-dep-8-0-arm64-armv7-hid-sections-cxx11', 'Xcode'),
       Toolchain('ios-dep-8-0-arm64-armv7-hid-sections-lto-cxx11', 'Xcode'),
       Toolchain('ios-dep-10-0-bitcode-cxx17', 'Xcode'),
+      Toolchain('ios-dep-11-0-bitcode-cxx17', 'Xcode'),
+      Toolchain('ios-dep-12-0-bitcode-cxx17', 'Xcode'),
       Toolchain('ios-nocodesign', 'Xcode', nocodesign=True),
       Toolchain('ios-nocodesign-arm64', 'Xcode', ios_version='8.1', nocodesign=True),
       Toolchain('ios-nocodesign-armv7', 'Xcode', ios_version='8.1', nocodesign=True),
@@ -747,7 +800,31 @@ if platform.system() == 'Darwin':
       Toolchain('ios-nocodesign-13-6-dep-9-3-armv7s', 'Xcode', ios_version='13.6', nocodesign=True),
       Toolchain('ios-nocodesign-13-6-dep-9-3', 'Xcode', ios_version='13.6', nocodesign=True),
       Toolchain('ios-nocodesign-13-6-dep-9-3-device-cxx11', 'Xcode', ios_version='13.6', nocodesign=True),
-      Toolchain('ios-nocodesign-13-6-dep-9-3-device', 'Xcode', ios_version='13.6', nocodesign=True),      
+      Toolchain('ios-nocodesign-13-6-dep-9-3-device', 'Xcode', ios_version='13.6', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3-arm64', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3-armv7', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3-armv7s', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3-device-cxx11', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-0-dep-9-3-device', 'Xcode', ios_version='14.0', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0-arm64', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0-armv7', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0-armv7s', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0-device-cxx11', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-2-dep-10-0-device', 'Xcode', ios_version='14.2', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0-arm64', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0-armv7', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0-armv7s', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0-device-cxx11', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-3-dep-10-0-device', 'Xcode', ios_version='14.3', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0-arm64', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0-armv7', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0-armv7s', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0-device-cxx11', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-14-4-dep-10-0-device', 'Xcode', ios_version='14.4', nocodesign=True),
       Toolchain('ios-nocodesign-dep-9-0-cxx14', 'Xcode', nocodesign=True),
       Toolchain('xcode', 'Xcode'),
       Toolchain('xcode-cxx98', 'Xcode'),
@@ -806,9 +883,12 @@ if platform.system() == 'Darwin':
       Toolchain('osx-10-15-dep-10-10-cxx14', 'Xcode', osx_version='10.15'),
       Toolchain('osx-10-15-dep-10-10-cxx17', 'Xcode', osx_version='10.15'),
       Toolchain('osx-10-15-dep-10-12-cxx17', 'Xcode', osx_version='10.15'),
-      Toolchain('osx-10-16', 'Xcode', osx_version='10.16'),
-      Toolchain('osx-10-16-cxx17', 'Xcode', osx_version='10.16'),
-      Toolchain('osx-10-16-dep-10-10-cxx17', 'Xcode', osx_version='10.16'),
+      Toolchain('osx-11-0', 'Xcode', osx_version='11.0'),
+      Toolchain('osx-11-0-cxx17', 'Xcode', osx_version='11.0'),
+      Toolchain('osx-11-0-dep-10-10-cxx17', 'Xcode', osx_version='11.0'),
+      Toolchain('osx-11-1', 'Xcode', osx_version='11.1'),
+      Toolchain('osx-11-1-cxx17', 'Xcode', osx_version='11.1'),
+      Toolchain('osx-11-1-dep-10-10-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('linux-gcc-x64', 'Unix Makefiles'),
   ]
 
@@ -853,6 +933,7 @@ if os.name == 'posix':
       Toolchain('gcc-hid-fpic', 'Unix Makefiles'),
       Toolchain('gcc-gold', 'Unix Makefiles'),
       Toolchain('gcc-pic', 'Unix Makefiles'),
+      Toolchain('gcc-pic-cxx17', 'Unix Makefiles'),
       Toolchain('gcc-c11', 'Unix Makefiles'),
       Toolchain('gcc-cxx14-c11', 'Unix Makefiles'),
       Toolchain('gcc-cxx17-c11', 'Unix Makefiles'),
@@ -883,6 +964,14 @@ if os.name == 'posix':
       Toolchain('gcc-8-cxx17-fpic', 'Unix Makefiles'),
       Toolchain('gcc-8-cxx17-gnu-fpic', 'Unix Makefiles'),
       Toolchain('gcc-8-cxx17-concepts', 'Unix Makefiles'),
+      Toolchain('gcc-9', 'Unix Makefiles'),
+      Toolchain('gcc-9-cxx17', 'Unix Makefiles'),
+      Toolchain('gcc-9-cxx17-fpic', 'Unix Makefiles'),
+      Toolchain('gcc-9-cxx17-gnu-fpic', 'Unix Makefiles'),
+      Toolchain('gcc-10', 'Unix Makefiles'),
+      Toolchain('gcc-10-cxx17', 'Unix Makefiles'),
+      Toolchain('gcc-10-cxx17-fpic', 'Unix Makefiles'),
+      Toolchain('gcc-10-cxx17-gnu-fpic', 'Unix Makefiles'),
       Toolchain('gcc-cxx98', 'Unix Makefiles'),
       Toolchain('gcc-lto', 'Unix Makefiles'),
       Toolchain('libcxx', 'Unix Makefiles'),
@@ -903,6 +992,8 @@ if os.name == 'posix':
       Toolchain('openbsd-egcc-cxx11-static-std', 'Unix Makefiles'),
       Toolchain('ninja-gcc-7-cxx17-concepts', 'Ninja'),
       Toolchain('ninja-gcc-8-cxx17-concepts', 'Ninja'),
+      Toolchain('ninja-clang-cxx17-fpic', 'Ninja'),
+      Toolchain('ninja-gcc-cxx17-fpic', 'Ninja'),
   ]
 
 def get_by_name(name):
