@@ -15,6 +15,7 @@ import sys
 import tarfile
 import tempfile
 import time
+import re
 import zipfile
 
 print(
@@ -201,24 +202,25 @@ def get_android_url():
 def get_cmake_url():
   if platform.system() == 'Darwin':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-macos-universal.tar.gz',
-        '6894085b4c4a81a142729d91e24c526edfd4205d'
+        'https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1-macos10.10-universal.tar.gz',
+        '668e554a7fa7ad57eaf73d374774afd7fd25f98f'
     )
   elif platform.system() == 'Linux':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.tar.gz',
-        '205509f796344864c513b6ad40a67a20b94117d4'
+        'https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1-linux-x86_64.tar.gz',
+        'a446ca642801ff7be2c37eaa6279f72bc252fbdb'
     )
   elif platform.system() == 'Windows':
     return (
-        'https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-win64-x64.zip',
-        '76b58ef6ff20c4a11dab9ede9791c8d51e33988a'
+        'https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1-windows-x86_64.zip',
+        'a002d619eeeb80bb152f7e63cea1288d0380921f'
     )
   else:
     sys.exit('Unknown system: {}'.format(platform.system()))
 
 is_android = toolchain.startswith('android-')
 is_ninja = toolchain.startswith('ninja-')
+is_versioned_gcc = re.match('gcc-([0-9]*)[-\.]', toolchain)
 
 ### Prepare directories
 
@@ -274,6 +276,12 @@ if is_ninja:
       ninja_archive_local,
       ci_dir
   )
+
+# Assuming gcc is on Ubuntu in CI
+if is_versioned_gcc:
+  subprocess.check_call(['sudo', 'apt-get', 'update'])
+  gcc_version = is_versioned_gcc.group(1)
+  subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'gcc-'+gcc_version, 'g++-'+gcc_version])
 
 ### Unify directories
 

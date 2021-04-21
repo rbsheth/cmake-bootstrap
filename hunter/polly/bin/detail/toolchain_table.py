@@ -565,7 +565,7 @@ if platform.system() == 'Darwin':
       Toolchain('ios-14-4-dep-10-0-armv7', 'Xcode', ios_version='14.4'),
       Toolchain('ios-14-4-dep-10-0-armv7s', 'Xcode', ios_version='14.4'),
       Toolchain('ios-14-4-dep-10-0-device-cxx14', 'Xcode', ios_version='14.4'),
-      Toolchain('ios-14-4-dep-10-0-device-bitcode-cxx14', 'Xcode', ios_version='14.4'),      
+      Toolchain('ios-14-4-dep-10-0-device-bitcode-cxx14', 'Xcode', ios_version='14.4'),
       Toolchain('ios-14-3-dep-10-0-arm64', 'Xcode', ios_version='14.3'),
       Toolchain('ios-14-3-dep-10-0-armv7', 'Xcode', ios_version='14.3'),
       Toolchain('ios-14-3-dep-10-0-armv7s', 'Xcode', ios_version='14.3'),
@@ -889,6 +889,7 @@ if platform.system() == 'Darwin':
       Toolchain('osx-11-1', 'Xcode', osx_version='11.1'),
       Toolchain('osx-11-1-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('osx-11-1-dep-10-10-cxx17', 'Xcode', osx_version='11.1'),
+      Toolchain('osx-11-1-dep-10-14-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('linux-gcc-x64', 'Unix Makefiles'),
   ]
 
