@@ -51,11 +51,9 @@ def getCmakeVersion():
 
 def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     availableToolchainsDescriptions = [
-        "osx-10-13-dep-10-10-cxx17 (macOS SDK 10.13, Deployment Target OSX 10.10, Clang/LLVM, C++17, Xcode)",
-        "osx-10-14-dep-10-10-cxx17 (macOS SDK 10.14, Deployment Target OSX 10.10, Clang/LLVM, C++17, Xcode)",
         "osx-10-15-dep-10-10-cxx17 (macOS SDK 10.15, Deployment Target OSX 10.10, Clang/LLVM, C++17, Xcode)",
         "osx-10-15-cxx17 (macOS SDK 10.15, Clang/LLVM, C++17, Xcode)",
-        "osx-11-1-dep-10-10-cxx17 (macOS SDK 11.1, Deployment Target OSX 10.10, Clang/LLVM, C++17, Xcode)",
+        "osx-11-1-dep-10-14-cxx17 (macOS SDK 11.1, Deployment Target OSX 10.14, Clang/LLVM, C++17, Xcode)",
         "osx-11-1-cxx17 (macOS SDK 11.1, Clang/LLVM, C++17, Xcode)",
         "ios-11-4-dep-9-0-bitcode-cxx17 (iOS SDK 11.4, Deployment Target iOS 9.0, Clang/LLVM, Bitcode, C++17, Xcode)",
         "clang-libcxx17-fpic (Clang/LLVM, LLVM Standard C++ Library (libc++), C++17, PIC, Default Generator: Unix Makefiles)",
@@ -69,11 +67,9 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     ]
 
     availableToolchains = [
-        "osx-10-13-dep-10-10-cxx17",
-        "osx-10-14-dep-10-10-cxx17",
         "osx-10-15-dep-10-10-cxx17",
         "osx-10-15-cxx17",
-        "osx-11-1-dep-10-10-cxx17",
+        "osx-11-1-dep-10-14-cxx17",
         "osx-11-1-cxx17",
         "ios-11-4-dep-9-0-bitcode-cxx17",
         "clang-libcxx17-fpic",
