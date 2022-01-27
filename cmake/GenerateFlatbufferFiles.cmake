@@ -1,10 +1,13 @@
-if(IOS OR ANDROID)
-  add_executable(flatbuffers::flatc IMPORTED)
+macro(ImportFlatbufferHostCompiler)
+  if(NOT TARGET flatbuffers::flatc)
+    add_executable(flatbuffers::flatc IMPORTED)
+  endif()
+
   set_property(TARGET flatbuffers::flatc APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
   set_target_properties(flatbuffers::flatc PROPERTIES IMPORTED_LOCATION_RELEASE "${HUNTER_HOST_ROOT}/bin/flatc")
 
   message(STATUS "Using imported flatc from host: ${HUNTER_HOST_ROOT}/bin/flatc")
-endif(IOS OR ANDROID)
+endmacro()
 
 # Flatbuffer stuff: Fairly analagous to what we do for the protobuf stuff. We (currently) refer to
 # a shared .fbs schema file located in monorepo. This step invokes the flatbuffer compiler

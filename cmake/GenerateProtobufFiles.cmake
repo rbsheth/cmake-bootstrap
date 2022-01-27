@@ -1,10 +1,25 @@
-if(IOS OR ANDROID)
-  add_executable(protobuf::protoc IMPORTED)
+macro(ImportProtobufHostCompiler)
+  if(NOT TARGET protobuf::protoc)
+    add_executable(protobuf::protoc IMPORTED)
+  endif()
   set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
   set_target_properties(protobuf::protoc PROPERTIES IMPORTED_LOCATION_RELEASE "${HUNTER_HOST_ROOT}/bin/protoc")
 
   message(STATUS "Using imported protoc from host: ${HUNTER_HOST_ROOT}/bin/protoc")
-endif(IOS OR ANDROID)
+endmacro()
+
+macro(ImportGrpcHostPlugins)
+  foreach(LANG IN ITEMS cpp csharp node objective_c php python ruby)
+    if(NOT TARGET gRPC::grpc_${LANG}_plugin)
+      add_executable(gRPC::grpc_${LANG}_plugin IMPORTED)
+    endif()
+    set_property(TARGET gRPC::grpc_${LANG}_plugin APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+    find_program(GRPC_${LANG}_HOST_PLUGIN_LOCATION grpc_${LANG}_plugin PATHS "${HUNTER_HOST_ROOT}/bin/" NO_DEFAULT_PATH REQUIRED)
+    set_target_properties(gRPC::grpc_${LANG}_plugin PROPERTIES IMPORTED_LOCATION_RELEASE "${GRPC_${LANG}_HOST_PLUGIN_LOCATION}")
+  endforeach()
+
+  message(STATUS "Using imported gRPC plugins from host: ${HUNTER_HOST_ROOT}/bin/grpc_*_plugin")
+endmacro()
 
 macro(GenerateProtobufFiles)
   set(_OPTIONS_ARGS)
