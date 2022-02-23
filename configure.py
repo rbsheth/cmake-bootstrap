@@ -134,6 +134,8 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
     parser.add_argument("--clear", help="Delete the toolchain's directory in _builds before configuring.", action='store_true')
     parser.add_argument("--clear-all", help="Delete the _builds directory before configuring.", action='store_true')
     parser.add_argument("--disable-tuning", help="Fallback to tuning for SSE2 instead of newer instruction sets.", action='store_true')
+    parser.add_argument("-ht","--host-toolchain", help="R|Toolchain to use for host. Supported values are:\n\t"+"\n\t".join(availableToolchainsDescriptions), choices=availableToolchains, metavar='')
+    parser.add_argument("-hG","--host-generator", help="R|Which CMake generator to use for host, only applies to toolchains with a \"Default Generator.\" Should be one of:\n\t"+"\n\t".join(availableGenerators), choices=availableGenerators, metavar='')
     if(addParserArguments):
         addParserArguments(parser)
     args = parser.parse_args()
@@ -218,6 +220,14 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
             additionalCMakeArguments.append("-A x64")
         else:
             args.generator = "Unix Makefiles"
+
+    if args.host_toolchain in availableToolchains:
+        if args.host_generator is None:
+            args.host_generator = "Unix Makefiles"
+        pathToHostToolchain = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "hunter/polly", args.host_toolchain+".cmake"))
+        additionalCMakeArguments.append("-DHUNTER_EXPERIMENTAL_HOST_TOOLCHAIN_FILE="+pathToHostToolchain)
+        additionalCMakeArguments.append("-DHUNTER_EXPERIMENTAL_HOST_GENERATOR="+args.host_generator)
+
     if args.build_dir is None:
         args.build_dir = "_builds/"+selectedToolchain+extraDirName
 
