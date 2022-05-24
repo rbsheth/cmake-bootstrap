@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/cpp-pm/polly.git
 	branch = master
-	commit = 8f0db435a110987997ef44077dc4d6eb6e57b3b3
-	parent = 1871b7dcc2d578b53ed54ef95ec3e5cb3fdb780c
+	commit = 601583040185c5bfc5d499131459a2c09c53ec1a
+	parent = bef32dfebbffd85896e18a9bfd1e6ed768f329b8
 	method = merge
 	cmdver = 0.4.3

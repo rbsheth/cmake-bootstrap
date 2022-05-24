@@ -283,6 +283,10 @@ if is_versioned_gcc:
   gcc_version = is_versioned_gcc.group(1)
   subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'gcc-'+gcc_version, 'g++-'+gcc_version])
 
+# Install OpenGL support
+if platform.system() == 'Linux':
+  subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'libglu1-mesa-dev', 'mesa-common-dev', 'libgl1-mesa-dev'])
+
 ### Unify directories
 
 for i in os.listdir(ci_dir):

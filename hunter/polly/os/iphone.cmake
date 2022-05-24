@@ -174,3 +174,9 @@ if(_all_archs_len EQUAL 1)
 else()
   set(CMAKE_SYSTEM_PROCESSOR "")
 endif()
+
+# fix try_compile "Detecting C compiler ABI info - failed" error
+# https://gitlab.kitware.com/cmake/cmake/-/issues/19720
+if("${IOS_SDK_VERSION}" VERSION_GREATER_EQUAL "13.0")
+  set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
+endif()
