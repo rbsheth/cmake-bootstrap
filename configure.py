@@ -1,42 +1,99 @@
-#!/usr/bin/env python
-import sys
-import errno
+#!/usr/bin/env python3
 import os
 import argparse
-import shutil
-import subprocess
 import re
+import subprocess
+import sys
+import shutil
+from enum import Enum
 from distutils.version import StrictVersion
 
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
+SCRIPT_ROOT = os.path.dirname(os.path.abspath(__file__))
+POLLY_PATH = os.path.join(SCRIPT_ROOT,  "hunter", "polly")
+sys.path.append(os.path.join(POLLY_PATH, 'bin'))
+from detail.toolchain_table import get_by_name # noqa
 
-#Function from: http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text
-class SmartFormatter(argparse.HelpFormatter):
-    def _split_lines(self, text, width):
-        if text.startswith('R|'):
-            return text[2:].splitlines()
-        # this is the RawTextHelpFormatter._split_lines
-        return argparse.HelpFormatter._split_lines(self, text, width)
+NODEJS_TEMPLATE_PATH = os.path.join(SCRIPT_ROOT, "cmake", "nodejs", "CMakeLists.txt.in")
 
-#Function from: http://stackoverflow.com/questions/34927479/command-line-show-list-of-options-and-let-user-choose
-def let_user_pick(options):
-    print("Please choose:")
-    for idx, element in enumerate(options):
-        print("{}) {}".format(idx+1,element))
-    i = input("Enter number: ")
-    try:
-        if 0 < int(i) <= len(options):
-            return int(i) - 1
-    except:
-        pass
-    return None
+DEFAULT_CMAKE_FLAGS = '-DHUNTER_STATUS_DEBUG=OFF -DHUNTER_USE_CACHE_SERVERS=YES'
+
+'''
+The following data structure maps between command line flags that are supported, and the associated cmake
+variable that is used to trigger the behaviour controlled by the flag. Note that the cmake variables are
+prefixed downstream.
+'''
+DESCRIPTION = 'description'
+CMAKE_VAR = 'cmake_var'
+FLAGS = {
+    'with_java': {
+        DESCRIPTION: 'Build Java bindings and JNI classes (requires JDK and SWIG)',
+        CMAKE_VAR: 'BUILD_JAVA_BINDINGS=ON'
+    },
+    'with_python': {
+        DESCRIPTION: 'Build Python bindings',
+        CMAKE_VAR: 'BUILD_PYTHON_BINDINGS=ON'
+    },
+    'with_node': {
+        DESCRIPTION: 'Build Node V8 JS bindings for Node version specified',
+        CMAKE_VAR: 'BUILD_JS_V8_BINDINGS=ON'
+    },
+    'without_projects': {
+        DESCRIPTION: 'Disable building of the included projects',
+        CMAKE_VAR: 'BUILD_PROJECTS=OFF'
+    },
+    'build_shared': {
+        DESCRIPTION: 'Build shared libraries (.so/.dylib/.dll) instead of static libraries (.a)',
+        CMAKE_VAR: 'BUILD_SHARED_LIBS=ON'
+    },
+    'without_tests': {
+        DESCRIPTION: 'Disable building of the included tests',
+        CMAKE_VAR: 'BUILD_TESTS=OFF'
+    },
+    'without_clang_format': {
+        DESCRIPTION: 'Disable automatic formatting of code',
+        CMAKE_VAR: 'ENABLE_CLANG_FORMAT=OFF'
+    },
+    'with_clang_tidy': {
+        DESCRIPTION: 'Use clang-tidy',
+        CMAKE_VAR: 'ENABLE_CLANG_TIDY=OFF'
+    },
+    'with_iwyu': {
+        DESCRIPTION: 'Use Include-What-You-Use',
+        CMAKE_VAR: 'ENABLE_IWYU=OFF'
+    },
+    'with_cuda': {
+        DESCRIPTION: 'Enable usage of NVIDIA CUDA',
+        CMAKE_VAR: 'ENABLE_CUDA=ON'
+    },
+    'with_librsvg': {
+        DESCRIPTION: 'Enable usage of librsvg and the relevant support functions',
+        CMAKE_VAR: 'BUILD_WITH_LIBRSVG_SUPPORT=ON'
+    },
+    'with_nvsvg': {
+        DESCRIPTION: 'Enable usage of nvsvg (NVIDIA Path Rendering)',
+        CMAKE_VAR: 'BUILD_WITH_NVSVG_SUPPORT=ON'
+    },
+    'with_amanithsvg': {
+        DESCRIPTION: 'Enable usage of AmanithSVG rendering library',
+        CMAKE_VAR: 'BUILD_WITH_AMANITHSVG_SUPPORT=ON'
+    },
+    'disable_tuning': {
+        DESCRIPTION: 'Fallback to tuning for SSE2 instead of newer instruction sets',
+        CMAKE_VAR: 'DISABLE_ARCHITECTURE_OPTIMIZATION=ON'
+    }
+}
+
+
+# For configurable toolchains, these are the available build configurations.
+class Configs(Enum):
+
+    Debug = "Debug"
+    Release = "Release"
+    RelWithDebInfo = "RelWithDebInfo"
+    MinSizeRel = "MinSizeRel"
+
+    def __str__(self):
+        return self.name
 
 def getCmakeVersion():
     sp = subprocess.Popen("cmake --version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -49,97 +106,16 @@ def getCmakeVersion():
             for match in re.finditer(versionRegex, row.decode('utf-8')):
                 return match.group(1)
 
+def add_flags_to_parser(parser):
+    for flag_name, flag_metadata in FLAGS.items():
+        # 'with_java' -> --with-java
+        command_line_name = '--' + flag_name.replace('_', '-')
+
+        # Create a parser argument for this flag
+        parser.add_argument(command_line_name, help=flag_metadata[DESCRIPTION], action='store_true')
+
+
 def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
-    availableToolchainsDescriptions = [
-        "osx-10-15-dep-10-10-cxx17 (macOS SDK 10.15, Deployment Target OSX 10.10, Clang/LLVM, C++17, Xcode)",
-        "osx-10-15-cxx17 (macOS SDK 10.15, Clang/LLVM, C++17, Xcode)",
-        "osx-11-1-dep-10-14-cxx17 (macOS SDK 11.1, Deployment Target OSX 10.14, Clang/LLVM, C++17, Xcode)",
-        "osx-11-1-cxx17 (macOS SDK 11.1, Clang/LLVM, C++17, Xcode)",
-        "ios-11-4-dep-9-0-bitcode-cxx17 (iOS SDK 11.4, Deployment Target iOS 9.0, Clang/LLVM, Bitcode, C++17, Xcode)",
-        "clang-libcxx17-fpic (Clang/LLVM, LLVM Standard C++ Library (libc++), C++17, PIC, Default Generator: Unix Makefiles)",
-        "emscripten-cxx17 (Emscripten/LLVM, C++17, Unix Makefiles)",
-        "gcc-8-cxx17-fpic (gcc/g++ 8, C++17, PIC, Unix Makefiles)",
-        "gcc-9-cxx17-fpic (gcc/g++ 9, C++17, PIC, Unix Makefiles)",
-        "vs-14-2015-win64-cxx17 (Visual Studio 2015 Win64, C++17)",
-        "vs-15-2017-win64-cxx17 (Visual Studio 2017 Win64, C++17)",
-        "vs-16-2019-win64-cxx17 (Visual Studio 2019 Win64, C++17)"
-        "vs-16-2019-win64-cxx17-cuda-cxx14 (Visual Studio 2019 Win64, C++17, CUDA C++14)"
-    ]
-
-    availableToolchains = [
-        "osx-10-15-dep-10-10-cxx17",
-        "osx-10-15-cxx17",
-        "osx-11-1-dep-10-14-cxx17",
-        "osx-11-1-cxx17",
-        "ios-11-4-dep-9-0-bitcode-cxx17",
-        "clang-libcxx17-fpic",
-        "emscripten-cxx17",
-        "gcc-8-cxx17-fpic",
-        "gcc-9-cxx17-fpic",
-        "vs-14-2015-win64-cxx17",
-        "vs-15-2017-win64-cxx17",
-        "vs-16-2019-win64-cxx17",
-        "vs-16-2019-win64-cxx17-cuda-cxx14"
-    ]
-
-    availableConfigs = [
-        "Debug",
-        "Release",
-        "RelWithDebInfo",
-        "MinSizeRel"
-    ]
-
-    configurableToolchains = [
-        "clang-libcxx17-fpic",
-        "emscripten-cxx17",
-        "gcc-8-cxx17-fpic",
-        "gcc-9-cxx17-fpic"
-    ]
-
-    # Retrieve the available generators from cmake.
-    sp = subprocess.Popen("cmake -G", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    out, err = sp.communicate()
-    availableGenerators = []
-    if err:
-        for row in err.split(b'\n'):
-            if b'=' in row:
-                key, value = row.split(b'=')
-                key = key.strip()
-                if key != b'':
-                    availableGenerators.append(key.decode('utf-8'))
-
-    if len(availableGenerators) == 0:
-        print("cmake not found in path. Please install it and try again!")
-        exit(1)
-
-    # Retrieve the version number from CMake
-    cmakeVersion = getCmakeVersion()
-
-    parser = argparse.ArgumentParser(description="Configure script to generate build files using CMake.", formatter_class=SmartFormatter)
-    parser.add_argument("toolchain", help="R|Toolchain to use to build. Supported values are:\n\t"+"\n\t".join(availableToolchainsDescriptions), choices=availableToolchains, metavar='<toolchain>')
-    parser.add_argument("--with-java", help="Build Java bindings and JNI classes (requires JDK and SWIG)", action='store_true')
-    parser.add_argument("--with-python", help="Build Python bindings (requires Python and SWIG)", action='store_true')
-    parser.add_argument("--without-projects", help="Disable building of the included projects.", action='store_true')
-    parser.add_argument("--build-shared", help="Build shared libraries (.so/.dylib/.dll) instead of static libraries (.a). Forced on by --with-java.", action='store_true')
-    parser.add_argument("--without-tests", help="Disable building of the included tests.", action='store_true')
-    parser.add_argument("--without-clang-format", help="Disable auto-formatting of code.", action='store_true')
-    parser.add_argument("--with-clang-tidy", help="Enable using clang-tidy to analyze code.", action='store_true')
-    parser.add_argument("--with-iwyu", help="Enable running include-what-you-use on code.", action='store_true')
-    parser.add_argument("--with-cuda", help="Enable CUDA processing.", action='store_true')
-    parser.add_argument("--dev", help="Enable development features like debug logging, regardless of build type", action='store_true')
-    parser.add_argument("-r","--reconfigure", help="Clear the CMake cache when configuring, use when changing options for already configured toolchains.", action='store_true')
-    parser.add_argument("-c","--config",help="R|Build configuration, applies to non-Xcode/Visual Studio generators. Default is Debug. Should be one of:\n\t"+"\n\t".join(availableConfigs), choices=availableConfigs, metavar='')
-    parser.add_argument("-G","--generator",help="R|Which CMake generator to use, only applies to toolchains with a \"Default Generator.\" Should be one of:\n\t"+"\n\t".join(availableGenerators), choices=availableGenerators, metavar='')
-    parser.add_argument("-B","--build-dir",help="Specify the build directory to use. Default is _builds/<toolchain_name>-<config>")
-    parser.add_argument("--clear", help="Delete the toolchain's directory in _builds before configuring.", action='store_true')
-    parser.add_argument("--clear-all", help="Delete the _builds directory before configuring.", action='store_true')
-    parser.add_argument("--disable-tuning", help="Fallback to tuning for SSE2 instead of newer instruction sets.", action='store_true')
-    parser.add_argument("-ht","--host-toolchain", help="R|Toolchain to use for host. Supported values are:\n\t"+"\n\t".join(availableToolchainsDescriptions), choices=availableToolchains, metavar='')
-    parser.add_argument("-hG","--host-generator", help="R|Which CMake generator to use for host, only applies to toolchains with a \"Default Generator.\" Should be one of:\n\t"+"\n\t".join(availableGenerators), choices=availableGenerators, metavar='')
-    if(addParserArguments):
-        addParserArguments(parser)
-    args = parser.parse_args()
-
     if(not os.path.isfile("CMakeLists.txt")):
         print("Couldn't find CMakeLists.txt in the current folder. Please run this script from a folder with CMakeLists.txt!")
         exit(1)
@@ -155,84 +131,79 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         print("Couldn't find PROJ_NAME in CMakeLists.txt in the current folder. Please double check CMakeLists.txt!")
         exit(1)
 
-    selectedToolchain = args.toolchain
+    parser = argparse.ArgumentParser(description="Configure script to generate build files for " + projectName + " using CMake.")
 
-    additionalCMakeArguments = []
-    need3rdPartyBuild = False
-    if "emscripten" in args.toolchain:
-        additionalCMakeArguments.append("-DEMSCRIPTEN_FORCE_COMPILERS=ON")
-        print("The Emscripten toolchain will not build Java bindings, shared libraries, projects, or tests, even if selected.")
-        args.with_java = False
-        args.build_shared = False
-        args.without_projects = True
-        args.without_tests = True
+    # Toolchain-related arguments.
+    parser.add_argument(
+        "toolchain",
+        help="Toolchain to use to build. Supported toolchain files are found in {}".format(POLLY_PATH),
+        type=str)
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Build configuration, applies to non-Xcode/Visual Studio generators. Default is Debug.",
+        choices=list(Configs),
+        default=Configs.Debug,
+        type=Configs
+    )
+    parser.add_argument(
+        "-B", "--build-dir", help="Specify the build directory to use. Default is _builds/<toolchain_name>-<config>")
+    parser.add_argument(
+        "-ht","--host-toolchain",
+        help="Toolchain to use to build for host. Supported toolchain files are found in {}".format(POLLY_PATH),
+        type=str)
+    parser.add_argument("--clear", help="Delete the toolchain's directory in _builds before configuring.", action='store_true')
+    parser.add_argument("--clear-all", help="Delete the _builds directory before configuring.", action='store_true')
+    parser.add_argument("--dev", help="Enable development features like debug logging, regardless of build type", action='store_true')
 
-    if args.with_java:
-        additionalCMakeArguments.append("-D"+projectName+"_BUILD_JAVA_BINDINGS=ON")
-    if args.with_python:
-        additionalCMakeArguments.append("-D"+projectName+"_BUILD_PYTHON_BINDINGS=ON")
-    if args.build_shared:
-        additionalCMakeArguments.append("-D"+projectName+"_BUILD_SHARED_LIBS=ON")
-    if args.without_projects:
-        additionalCMakeArguments.append("-D"+projectName+"_BUILD_PROJECTS=OFF")
-    if args.without_tests:
-        additionalCMakeArguments.append("-D"+projectName+"_BUILD_TESTS=OFF")
-    if args.without_clang_format:
-        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CLANG_FORMAT=OFF")
-    if args.with_clang_tidy:
-        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CLANG_TIDY=ON")
-    if args.with_iwyu:
-        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_IWYU=ON")
-    if args.with_cuda:
-        additionalCMakeArguments.append("-D"+projectName+"_ENABLE_CUDA=ON")
+    # On/off flags.
+    add_flags_to_parser(parser)
+    if(addParserArguments):
+        addParserArguments(parser)
+    args = parser.parse_args()
+
+    # For every flag that is true, set the appropriate cmake variable.
+    project_cmake_arg_list = [
+        flag_metadata[CMAKE_VAR] for flag_name, flag_metadata in FLAGS.items() if vars(args)[flag_name]
+    ]
+
+    # Add project prefix to each variable.
+    additional_cmake_args = ['-D'+ projectName +'_{}'.format(cmake_arg) for cmake_arg in project_cmake_arg_list]
+    polly_toolchain = get_by_name(args.toolchain)
+
+    # Situational logic
+    if not polly_toolchain.multiconfig:
+        additional_cmake_args.append("-DCMAKE_BUILD_TYPE=" + str(args.config))
+    elif "emscripten" in polly_toolchain.name:
+        additional_cmake_args.append("-DEMSCRIPTEN_FORCE_COMPILERS=ON")
+        print("The Emscripten toolchain will not build Java bindings, "
+              "shared libraries, projects, or tests, even if selected.")
+    if args.host_toolchain:
+        polly_host_toolchain = get_by_name(args.host_toolchain)
+        additional_cmake_args.append("-DHUNTER_EXPERIMENTAL_HOST_TOOLCHAIN_FILE="+os.path.abspath(os.path.join(POLLY_PATH, polly_host_toolchain.name + '.cmake')))
+        additional_cmake_args.append("-DHUNTER_EXPERIMENTAL_HOST_GENERATOR="+polly_host_toolchain.generator)
+
     # Turn the dev flag on if you have explicitly requested for the dev
     # flag to be on, or if the build type is not explicitly a type of
     # release build. This is useful for not needing to regenerate Xcode
     # projects - they just always default to Dev mode.
     if args.dev or args.config is None or args.config == "Debug":
-        additionalCMakeArguments.append("-D"+projectName+"_DEV=ON")
-    if args.disable_tuning:
-        additionalCMakeArguments.append("-D"+projectName+"_DISABLE_ARCHITECTURE_OPTIMIZATION=ON")
-    configArgument = ""
-    generatorArgument = ""
-    extraDirName = ""
-    if selectedToolchain in configurableToolchains:
-        if args.config is None:
-            args.config = "Debug"
-        if args.generator is None:
-            args.generator = "Unix Makefiles"
-        extraDirName = "-"+args.config
-        configArgument = "--config " + args.config + " "
-        additionalCMakeArguments.append("-DCMAKE_BUILD_TYPE="+args.config)
-    else:
-        if "ios" in selectedToolchain or "osx" in selectedToolchain:
-            args.generator = "Xcode"
+        additional_cmake_args.append("-D"+projectName+"_DEV=ON")
+
+    if "ios" in polly_toolchain.name or "osx" in polly_toolchain.name:
+        if "Xcode" in polly_toolchain.generator:
             # The "new" Xcode buildsystem doesn't work with many Hunter packages
             if StrictVersion("3.19") <= StrictVersion(getCmakeVersion()):
-                additionalCMakeArguments.append("-T buildsystem=1")
-        elif "vs-14-2015-win64" in selectedToolchain:
-            args.generator = "Visual Studio 14 2015 Win64"
-        elif "vs-15-2017-win64" in selectedToolchain:
-            args.generator = "Visual Studio 15 2017 Win64"
-            additionalCMakeArguments.append("-T host=x64")
-        elif "vs-16-2019-win64" in selectedToolchain:
-            args.generator = "Visual Studio 16 2019"
-            additionalCMakeArguments.append("-A x64")
-        else:
-            args.generator = "Unix Makefiles"
+                additional_cmake_args.append("-T buildsystem=1")
 
-    if args.host_toolchain in availableToolchains:
-        if args.host_generator is None:
-            args.host_generator = "Unix Makefiles"
-        pathToHostToolchain = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "hunter/polly", args.host_toolchain+".cmake"))
-        additionalCMakeArguments.append("-DHUNTER_EXPERIMENTAL_HOST_TOOLCHAIN_FILE="+pathToHostToolchain)
-        additionalCMakeArguments.append("-DHUNTER_EXPERIMENTAL_HOST_GENERATOR="+args.host_generator)
+    # Use the build dir if set, or create a reasonable default if not.
+    build_dir = (
+            args.build_dir or
+            "_builds/" + polly_toolchain.name + ('-' + str(args.config) if not polly_toolchain.multiconfig else '')
+        )
 
-    if args.build_dir is None:
-        args.build_dir = "_builds/"+selectedToolchain+extraDirName
-
-    if(checkParserArguments):
-        checkParserArguments(args, additionalCMakeArguments, projectName)
+    if checkParserArguments:
+        checkParserArguments(args, additional_cmake_args, projectName)
 
     if args.clear_all:
         if(os.path.isdir("_builds")):
@@ -241,34 +212,21 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         if(os.path.isdir(args.build_dir)):
             shutil.rmtree(args.build_dir)
 
-    mkdir_p(args.build_dir)
+    os.makedirs(build_dir, exist_ok=True)
 
-    if need3rdPartyBuild:
-        cmake3rdPartyCallString = "cmake -H3rdparty/ -B3rdparty/_build"
-        sp3p = subprocess.call(cmake3rdPartyCallString, shell=True)
-        if(sp3p != 0):
-            exit(sp3p)
-        cmake3rdPartyCallString = "cmake --build 3rdparty/_build"
-        sp3p = subprocess.call(cmake3rdPartyCallString, shell=True)
-        cmake3rdPartyCallString = "cmake -E remove_directory 3rdparty/_build"
-        sp3p = subprocess.call(cmake3rdPartyCallString, shell=True)
-        if(sp3p != 0):
-            exit(sp3p)
+    cmake_args = "-G \"{}\" -DCMAKE_TOOLCHAIN_FILE={} {} {}".format(
+        polly_toolchain.generator,
+        os.path.abspath(os.path.join(POLLY_PATH, polly_toolchain.name + '.cmake')),
+        DEFAULT_CMAKE_FLAGS,
+        ' '.join(additional_cmake_args)
+    )
 
-    pathToToolchain = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "hunter/polly", selectedToolchain+".cmake"))
-
-    cmakeCallString = (
-        "cmake -H. -B" +
-        args.build_dir +
-        " -G\"" +
-        args.generator +
-        "\" -DCMAKE_TOOLCHAIN_FILE=" +
-        pathToToolchain +
-        " -DHUNTER_STATUS_DEBUG=OFF -DHUNTER_USE_CACHE_SERVERS=YES " +
-        " ".join(additionalCMakeArguments))
-    sp = subprocess.call(cmakeCallString, shell=True)
-
-    return sp
+    if args.with_node:
+        print(cmake_args)
+    else:
+        cmake_call_string = "cmake -H. -B{} {}".format(build_dir, cmake_args)
+        sp = subprocess.check_call(cmake_call_string, shell=True)
+        return sp
 
 if __name__ == "__main__":
     cmakeWrapper()
