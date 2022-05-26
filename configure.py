@@ -209,8 +209,8 @@ def cmakeWrapper(addParserArguments=None, checkParserArguments=None):
         if(os.path.isdir("_builds")):
             shutil.rmtree("_builds")
     elif args.clear:
-        if(os.path.isdir(args.build_dir)):
-            shutil.rmtree(args.build_dir)
+        if(os.path.isdir(build_dir)):
+            shutil.rmtree(build_dir)
 
     os.makedirs(build_dir, exist_ok=True)
 
