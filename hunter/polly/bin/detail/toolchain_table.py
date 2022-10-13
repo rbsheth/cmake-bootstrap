@@ -235,6 +235,24 @@ if os.name == 'nt':
           vs_version='15'
       ),
       Toolchain(
+          'nmake-vs-16-2019-win64',
+          'NMake Makefiles',
+          arch='amd64',
+          vs_version='16'
+      ),
+      Toolchain(
+          'nmake-vs-16-2019-win64-cxx17',
+          'NMake Makefiles',
+          arch='amd64',
+          vs_version='16'
+      ),
+      Toolchain(
+          'nmake-vs-16-2019-win64-cxx17-nonpermissive',
+          'NMake Makefiles',
+          arch='amd64',
+          vs_version='16'
+      ),
+      Toolchain(
           'ninja-vs-12-2013-win64',
           'Ninja',
           arch='amd64',
@@ -263,6 +281,24 @@ if os.name == 'nt':
           'Ninja',
           arch='amd64',
           vs_version='15'
+      ),
+      Toolchain(
+          'ninja-vs-16-2019-win64',
+          'Ninja',
+          arch='amd64',
+          vs_version='16'
+      ),
+      Toolchain(
+          'ninja-vs-16-2019-win64-cxx17',
+          'Ninja',
+          arch='amd64',
+          vs_version='16'
+      ),
+      Toolchain(
+          'ninja-vs-16-2019-win64-cxx17-nonpermissive',
+          'Ninja',
+          arch='amd64',
+          vs_version='16'
       ),
       Toolchain(
           'vs-12-2013', 'Visual Studio 12 2013', arch='x86', vs_version='12'
@@ -577,6 +613,8 @@ if platform.system() == 'Linux':
 if platform.system() == 'Darwin':
   toolchain_table += [
       Toolchain('ios', 'Xcode'),
+      Toolchain('ios-arm64', 'Xcode'),
+      Toolchain('ios-arm64-cxx17', 'Xcode'),
       Toolchain('ios-cxx17', 'Xcode'),
       Toolchain('ios-bitcode', 'Xcode'),
       Toolchain('ios-14-4-dep-10-0-arm64', 'Xcode', ios_version='14.4'),
@@ -742,7 +780,9 @@ if platform.system() == 'Darwin':
       Toolchain('ios-dep-11-0-bitcode-cxx17', 'Xcode'),
       Toolchain('ios-dep-12-0-bitcode-cxx17', 'Xcode'),
       Toolchain('ios-nocodesign', 'Xcode', nocodesign=True),
-      Toolchain('ios-nocodesign-arm64', 'Xcode', ios_version='8.1', nocodesign=True),
+      Toolchain('ios-nocodesign-cxx17', 'Xcode', nocodesign=True),
+      Toolchain('ios-nocodesign-arm64', 'Xcode', nocodesign=True),
+      Toolchain('ios-nocodesign-arm64-cxx17', 'Xcode', nocodesign=True),
       Toolchain('ios-nocodesign-armv7', 'Xcode', ios_version='8.1', nocodesign=True),
       Toolchain('ios-nocodesign-hid-sections', 'Xcode', ios_version='8.1', nocodesign=True),
       Toolchain('ios-nocodesign-wo-armv7s', 'Xcode', ios_version='8.1', nocodesign=True),
@@ -855,6 +895,7 @@ if platform.system() == 'Darwin':
       Toolchain('ios-nocodesign-14-4-dep-10-0', 'Xcode', ios_version='14.4', nocodesign=True),
       Toolchain('ios-nocodesign-14-4-dep-10-0-device-cxx11', 'Xcode', ios_version='14.4', nocodesign=True),
       Toolchain('ios-nocodesign-14-4-dep-10-0-device', 'Xcode', ios_version='14.4', nocodesign=True),
+      Toolchain('ios-nocodesign-15-5-arm64-cxx17', 'Xcode', ios_version='15.5', nocodesign=True),
       Toolchain('ios-nocodesign-dep-9-0-cxx14', 'Xcode', nocodesign=True),
       Toolchain('xcode', 'Xcode'),
       Toolchain('xcode-cxx98', 'Xcode'),
@@ -863,6 +904,12 @@ if platform.system() == 'Darwin':
       Toolchain('xcode-gcc', 'Xcode'),
       Toolchain('xcode-hid-sections', 'Xcode'),
       Toolchain('xcode-sections', 'Xcode'),
+      Toolchain('osx', 'Xcode'),
+      Toolchain('osx-cxx17', 'Xcode'),
+      Toolchain('osx-make', 'Unix Makefiles'),
+      Toolchain('osx-make-cxx17', 'Unix Makefiles'),
+      Toolchain('osx-arch-universal2', 'Xcode'),
+      Toolchain('osx-arch-universal2-cxx17', 'Xcode'),
       Toolchain('osx-10-7', 'Xcode', osx_version='10.7'),
       Toolchain('osx-10-8', 'Xcode', osx_version='10.8'),
       Toolchain('osx-10-9', 'Xcode', osx_version='10.9'),
@@ -923,7 +970,14 @@ if platform.system() == 'Darwin':
       Toolchain('osx-11-1-arch-universal2-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('osx-11-1-dep-10-10-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('osx-11-1-dep-10-14-cxx17', 'Xcode', osx_version='11.1'),
+      Toolchain('osx-12-3-arch-universal2-cxx17', 'Xcode', osx_version='11.1'),
       Toolchain('linux-gcc-x64', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w32', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w32-cxx14', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w64', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w64-cxx14', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w64-cxx98', 'Unix Makefiles'),
+      Toolchain('linux-mingw-w64-gnuxx11', 'Unix Makefiles'),
   ]
 
 if os.name == 'posix':

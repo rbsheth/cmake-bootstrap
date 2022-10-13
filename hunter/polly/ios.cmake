@@ -10,20 +10,20 @@ endif()
 include("${CMAKE_CURRENT_LIST_DIR}/utilities/polly_module_path.cmake")
 include(polly_clear_environment_variables)
 include(polly_init)
-include("${CMAKE_CURRENT_LIST_DIR}/os/iphone-default-sdk.cmake") # -> IOS_SDK_VERSION
+
+include("${CMAKE_CURRENT_LIST_DIR}/os/iphone-default-sdk.cmake") # -> IOS_SDK_VERSION, IOS_DEPLOYMENT_SDK_VERSION
 
 set(POLLY_XCODE_COMPILER "clang")
 polly_init(
-  "iOS ${IOS_SDK_VERSION} Universal (iphoneos + iphonesimulator) / \
+    "iOS ${IOS_SDK_VERSION} / Deployment ${IOS_DEPLOYMENT_SDK_VERSION} / Universal (iphoneos + iphonesimulator) / \
 ${POLLY_XCODE_COMPILER} / \
 c++14 support"
-  "Xcode"
+    "Xcode"
 )
 
 include(polly_common)
-include(polly_fatal_error)
 
-# # Fix try_compile
+# Fix try_compile
 include(polly_ios_bundle_identifier)
 set(CMAKE_MACOSX_BUNDLE YES)
 

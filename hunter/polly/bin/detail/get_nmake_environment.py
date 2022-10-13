@@ -16,7 +16,7 @@ def get(arch, vs_version):
         )
     )
 
-  if vs_version == '15':
+  if vs_version == '15' or vs_version == '16':
     vcvarsall_dir = os.path.join(vs_path, '..', '..', 'VC', 'Auxiliary', 'Build')
   else:
     vcvarsall_dir = os.path.join(vs_path, '..', '..', 'VC')
